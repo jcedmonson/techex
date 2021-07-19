@@ -4,6 +4,11 @@ package com.stock;
 public class StockAccount {
 	private String name;
 	private Float balance;
+	
+	
+	
+	
+	
 	Stock heldStock = null;
 	
 public StockAccount(String name, Float balance) {
@@ -37,7 +42,7 @@ public StockAccount(String name) {
 		System.out.printf("Account Balance: %.2f\n", this.balance);
 		
 		if (this.heldStock != null) {
-			System.out.printf("You own %d shares of %s", 
+			System.out.printf("You own %d shares of %s\n", 
 					this.heldStock.getSharesCount(), this.heldStock.getStockSymbol());
 		}
 	}
@@ -47,20 +52,23 @@ public StockAccount(String name) {
 	}
 	
 	public void buyStock(Stock stock) {
-		if (stock.getStockPrice() > this.balance) {
+		Float totalPrice = stock.getStockPrice() * stock.getSharesCount();
+		if (totalPrice > this.balance) {
 			System.out.println("Insufficient funds for stock purchase.");
 		} else {
 			System.out.println("Purchase Allowed.");
 			this.heldStock = stock;
-			this.balance = this.balance - stock.getStockPrice();
+			this.balance = this.balance - totalPrice;
 		}
 	}
 	
 	public boolean validSale(Stock stock) {
 		// if stocks match.
-		if (stock.getStockSymbol() == this.heldStock.getStockSymbol()) {
+		if (stock.getStockSymbol().equals(this.heldStock.getStockSymbol())) {
+			System.out.println("User owns stock.");
 			// if count of share are less than or equal to owned.
 			if (stock.getSharesCount() <= this.heldStock.getSharesCount()) {
+				System.out.println("User owns enough stock.");
 				return true;
 			} 
 		}
@@ -77,6 +85,7 @@ public StockAccount(String name) {
 	
 	
 	public void sellStock(Stock stock) {
+		Float totalPrice = stock.getStockPrice() * stock.getSharesCount();
 		if(this.heldStock.equals(null)) {
 				// user does not own any stock
 				System.out.println("You dont have any stock to sell.");
@@ -86,12 +95,15 @@ public StockAccount(String name) {
 				this.heldStock.setSharesCount(
 						this.heldStock.getSharesCount()-stock.getSharesCount());
 				// adjust account balance, adding from sale...
-				this.balance += stock.getStockPrice();
-				
-				System.out.print;
+				this.setBalance(this.balance+totalPrice);
+				// check shares exist, if not, set local stock var to null.
+				if (this.heldStock.getSharesCount() == 0) {
+					this.heldStock = null;
+				}
 				
 			} else {
 				// requirements are not met
+				System.out.println("Insuffient shares to Complete Transaction.");
 			}
 		}
 			

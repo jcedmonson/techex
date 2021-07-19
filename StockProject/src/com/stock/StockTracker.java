@@ -5,8 +5,8 @@ import java.util.Scanner;
 public class StockTracker {
 
 	public static void main(String[] args) {
-		System.out.println("This program will help you track information ");
-		System.out.println("about your investments.");
+		System.out.println("This program will help you track information about your investments.");
+		
 		Scanner stdin = new Scanner(System.in);
 		
 		// create account
@@ -30,14 +30,14 @@ public class StockTracker {
 		}
 		
 		
-		// get stock of interest
-		Stock stock = getStockInfo();
-		
-		
 		// show details
 		sa.showAccountDetails();
 		
 		System.out.println("Its time for you to buy some s t o c k.");
+		
+		
+		// get stock of interest
+		Stock stock = getStockInfo();
 		
 		// purchase specified stock
 		sa.buyStock(stock);
@@ -48,7 +48,10 @@ public class StockTracker {
 		System.out.println("You will now be selling stock.");
 		
 		Stock sellStock = getStockInfo();
+		sa.sellStock(sellStock);
 		
+		sa.showAccountDetails();
+		stdin.close();
 		
 	}
 	
@@ -64,8 +67,7 @@ public class StockTracker {
 		// price
 		System.out.println("Please enter the price.");
 		Float sharePrice = stdin.nextFloat();
-		
+		stdin.close();
 		return new Stock(symbol, sharesCount, sharePrice);
-		
 	}
 }

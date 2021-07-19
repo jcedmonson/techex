@@ -7,7 +7,7 @@ public class Stock {
 	
 	public Stock(String stockSymbol, int sharesCount, Float stockPrice) {
 		super();
-		this.stockSymbol = stockSymbol;
+		this.stockSymbol = stockSymbol.toUpperCase();
 		this.sharesCount = sharesCount;
 		this.stockPrice = stockPrice;
 	}

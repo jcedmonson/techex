@@ -52,7 +52,7 @@ public class BankAccount {
 		return interestRate;
 	}
 
-	public void setInterestRate(float interestRate) {
+	public static void setInterestRate(float interestRate) {
 		BankAccount.interestRate = interestRate;
 	}
 	
