@@ -1,6 +1,6 @@
 package com.simple.account;
 
-public class SavingsAccount extends BankAccount {
+public class SavingsAccount extends BankAccount implements Account {
 	private float minimumBalance = 1000;
 
 	public SavingsAccount(int accountID, String ownerName, float balance) {
@@ -15,6 +15,22 @@ public class SavingsAccount extends BankAccount {
 		}
 		
 	}
+
+	@Override
+	public void print() {
+		System.out.println("\nSavings Summary:");
+		System.out.println("   Interest rate:" + this.getInterestRate());
+		System.out.println("Minimum Balance:" + minimumBalance);
+	}
+	
+	@Override
+	public String toString() {
+		return super.toString() +
+				" with interest rate " + this.getInterestRate() +
+				" and minimum balance " + this.minimumBalance;
+	}
+	
+	
 	
 	
 }

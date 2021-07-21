@@ -1,15 +1,12 @@
 package com.stock;
-
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class StockAccount {
 	private String name;
 	private Float balance;
-	
-	
-	
-	
-	
-	Stock heldStock = null;
+	private Float totalInvested = 0f;
+	private ArrayList<Stock> heldStock = new ArrayList<>();
 	
 public StockAccount(String name, Float balance) {
 	System.out.printf("Creating new account, balance is %.2f.\n", balance);
@@ -35,91 +32,140 @@ public StockAccount(String name) {
 		this.balance = balance;
 	}
 	
+	public ArrayList<Stock> getHeldStock() {
+		return heldStock;
+	}
+
 	public void showAccountDetails() {
 		System.out.println();
 		System.out.println("Your account details:");
 		System.out.printf("Name: %s\n", this.name);
-		System.out.printf("Account Balance: %.2f\n", this.balance);
+		System.out.printf("Account Balance: %.2f\n", this.balance);	
 		
-		if (this.heldStock != null) {
-			System.out.printf("You own %d shares of %s\n", 
-					this.heldStock.getSharesCount(), this.heldStock.getStockSymbol());
-		}
-	}
-	
-	public void getStock(String symbol, int shares, Float price) {
-		this.heldStock = new Stock(symbol, shares, price);
-	}
-	
-	public void buyStock(Stock stock) {
-		Float totalPrice = stock.getStockPrice() * stock.getSharesCount();
-		if (totalPrice > this.balance) {
-			System.out.println("Insufficient funds for stock purchase.");
-		} else {
-			System.out.println("Purchase Allowed.");
-			this.heldStock = stock;
-			this.balance = this.balance - totalPrice;
-		}
-	}
-	
-	public boolean validSale(Stock stock) {
-		// if stocks match.
-		if (stock.getStockSymbol().equals(this.heldStock.getStockSymbol())) {
-			System.out.println("User owns stock.");
-			// if count of share are less than or equal to owned.
-			if (stock.getSharesCount() <= this.heldStock.getSharesCount()) {
-				System.out.println("User owns enough stock.");
-				return true;
-			} 
-		}
-		return false;
-	}
-	
-	public void saleDetails(Stock stock) {
-		System.out.printf("Sale of %f %s stocks complete.\n", stock.getSharesCount(), stock.getStockSymbol());
-		System.out.println("Updating Account:");
-		// print new account balance.
-		
-	}
-	
-	
-	
-	public void sellStock(Stock stock) {
-		Float totalPrice = stock.getStockPrice() * stock.getSharesCount();
-		if(this.heldStock.equals(null)) {
-				// user does not own any stock
-				System.out.println("You dont have any stock to sell.");
-			} else if (validSale(stock)) {
-				// can sell
-				// adjust shares
-				this.heldStock.setSharesCount(
-						this.heldStock.getSharesCount()-stock.getSharesCount());
-				// adjust account balance, adding from sale...
-				this.setBalance(this.balance+totalPrice);
-				// check shares exist, if not, set local stock var to null.
-				if (this.heldStock.getSharesCount() == 0) {
-					this.heldStock = null;
-				}
-				
-			} else {
-				// requirements are not met
-				System.out.println("Insuffient shares to Complete Transaction.");
+		if (this.heldStock.size() > 0) {
+			for (Stock s: this.heldStock) {
+				System.out.println(s.toString());
+			}
+			System.out.println("Total Invested: "+this.totalInvested);
 			}
 		}
-			
+	
+	public int getStockIndex(String symbol) {
+		int index = -1;
+		for (int i = 0; i<this.heldStock.size(); i++) {
+			if (this.heldStock.get(i).getStockSymbol().equals(symbol)) {
+				index = i;
+			}
+		}
+		return index;
+	}
+	
+	
+	public void updateStock(HashMap<Object, Object> StockMap, Float totalPrice) throws StockException{
+		// if held stock list can be searched
 		
+		Stock newStock = (Stock) StockMap.get("stock");
+		String action = (String) StockMap.get("action");
+		int stockIndex = getStockIndex(newStock.getStockSymbol());
+		
+		
+		// stock exists need to append to stock count
+		if (action.equals("purchase")) {
+			if (stockIndex >= 0) {
+				// get old, matching stock
+				Stock oldStock = this.heldStock.get(stockIndex);
+				// set new stock shares count equivalent to old plus new.
+				newStock.setSharesCount(oldStock.getSharesCount() + newStock.getSharesCount());
+				// set new total investment
+				newStock.setTotalInvested(oldStock.getTotalInvested() + totalPrice);
+				// remove old stock entry
+				this.heldStock.remove(stockIndex);
+				// append new stock entry
+				this.heldStock.add(newStock);
+				
+			// stock does not exist, need to add
+			} else {
+				// set total investment for initial purchase.
+				newStock.setTotalInvested(totalPrice);
+				this.heldStock.add(newStock);
+			}
+		
+		// selling stock
+		} else {
+			// ensure stock exists
+			if (stockIndex >= 0) {
+				Stock oldStock = this.heldStock.get(stockIndex);
+				int shares = oldStock.getSharesCount() - newStock.getSharesCount();
+				// if we still have shares append.
+				if (shares > 0) {
+					oldStock.setSharesCount(shares);
+					// Adjust total investment
+					oldStock.setTotalInvested(oldStock.getTotalInvested() - totalPrice);
+				
+				// remove stock, we don't have anymore shares.
+				} else {
+					this.heldStock.remove(stockIndex);
+				}
+			} else {
+				throw new StockException(" You do not own this stock.");
+				}
+			}	
+		}
 			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-}	
+	
+	public void buyStock(HashMap<Object, Object>  stockDetails) throws StockException {
+		Stock stock;
+		String stockType = (String) stockDetails.get("type");
+		if (stockType.equals("dividend")) {
+			DividendStock div = (DividendStock) stockDetails.get("stock");
+			this.balance = (float) (this.balance + (div.getDividend() * div.getSharesCount()));
+			stock = div;
+		} else {
+			stock = (Stock) stockDetails.get("stock");
+		}
+		
+		Float totalPrice = stock.getStockPrice() * stock.getSharesCount();
+		if (totalPrice > this.balance) {
+			throw new StockException("Insuffient shares to Complete Transaction.");
+		} else {
+			HashMap<Object, Object> stockMap = new HashMap<>();
+			stockMap.put("action", "purchase");
+			stockMap.put("stock", stock);
+			try {
+				updateStock(stockMap, totalPrice);
+				System.out.println(" * Purchase completed, adjusting account balance.\n");
+				this.balance = this.balance - totalPrice;
+				this.totalInvested = this.totalInvested + totalPrice;
+			} catch (StockException e) {
+				System.out.println(e.getMessage());
+				}
+			}
+		}
+	
+	
+	public void sellStock(HashMap<Object, Object>  stockDetails) throws StockException {
+		Stock stock = (Stock) stockDetails.get("stock");
+		Float totalPrice = stock.getStockPrice() * stock.getSharesCount();
+		HashMap<Object, Object> stockMap = new HashMap<>();
+		stockMap.put("action", "sale");
+		stockMap.put("stock", stock);
+		
+		try {
+			updateStock(stockMap, totalPrice);
+			this.balance = this.balance + totalPrice;
+			this.totalInvested = this.totalInvested - totalPrice;
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			}
+		}
+	
+	@Override
+	public String toString() {
+		return this.heldStock.toString();
+		
+	}
+}
 
+		
+		
+		

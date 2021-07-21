@@ -1,6 +1,6 @@
 package com.simple.account;
 
-public class BankAccount {
+public class BankAccount implements Account{
 	
 	private int accountID;
 	private String ownerName;
@@ -56,7 +56,17 @@ public class BankAccount {
 		BankAccount.interestRate = interestRate;
 	}
 	
-	public void ShowAccountDetails() {
+	
+	public void withdraw(float amount) throws InsufficientFundsException {
+		if (amount > this.getBalance()) {
+			throw new InsufficientFundsException(
+					"Amount " + amount + " exceeds balance " + this.getBalance());
+		}
+		this.setBalance(this.getBalance() - amount);
+	}
+	
+	
+	public void print() {
 		System.out.println("A Bank Account");
 		System.out.printf("ID: %s\n", this.accountID);
 		System.out.printf("Balance: %s\n", this.balance);
@@ -64,6 +74,17 @@ public class BankAccount {
 		System.out.printf("Interest Rate: %s\n", BankAccount.interestRate);
 
 	}
+
+
+	@Override
+	public String toString() {
+		return "An account with id " + this.getAccountID() +
+				" with balance " + this.getBalance() +
+				" owned by " + this.getOwnerName() + ".";
+	}
+	
+	
+	
 	
 
 }

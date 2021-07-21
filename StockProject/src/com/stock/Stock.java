@@ -4,6 +4,7 @@ public class Stock {
 	private String stockSymbol;
 	private int sharesCount;
 	private Float stockPrice;
+	private Float totalInvested = 0f;
 	
 	public Stock(String stockSymbol, int sharesCount, Float stockPrice) {
 		super();
@@ -29,4 +30,20 @@ public class Stock {
 	public void setStockPrice(Float stockPrice) {
 		this.stockPrice = stockPrice;
 	}
+	
+	public void setTotalInvested(Float totalSpent){
+		this.totalInvested = totalSpent;
+	}
+	
+	public Float getTotalInvested(){
+		return this.totalInvested;
+	}
+	
+	@Override
+	public String toString() {
+		return "Stock: " + this.stockSymbol + ", " +
+				"# of Shares: " + this.sharesCount + ", " +
+				"Total Invested: " + this.totalInvested;
+	}
+		
 }
